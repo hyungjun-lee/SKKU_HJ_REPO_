@@ -9,7 +9,7 @@ void run_FT2(const char *name = "g4event")
 	const bool bRECO = true;
 	const bool TPCDet = true;
 	const bool FTDet = false;
-
+	bool test = true;
 	if (bG4SIM)
 	{
 		if (!run_g4sim(name))
