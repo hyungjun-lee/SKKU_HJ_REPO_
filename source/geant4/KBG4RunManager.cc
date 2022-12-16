@@ -7,6 +7,7 @@
 #include "G4ProcessTable.hh"
 #include "G4GDMLParser.hh"
 #include "G4strstreambuf.hh"
+#include "TObjString.h"
 
 #include "TSystem.h"
 
@@ -151,7 +152,6 @@ void KBG4RunManager::Run(G4int argc, char **argv, const G4String &type)
     g4_info << "Initializing Geant4 run with macro " << fileName << endl;
     uiManager -> ApplyCommand(command+fileName);
   }
-
 
   WriteToFile(fProcessTable);
   WriteToFile(fSensitiveDetectors);
@@ -370,12 +370,12 @@ void KBG4RunManager::AddTrackVertex(Double_t px, Double_t py, Double_t pz, Int_t
   fCurrentTrack -> AddVertex(px, py, pz, detectorID, vx, vy, vz);
 }
 
-void KBG4RunManager::AddMCStep(Int_t detectorID, Double_t x, Double_t y, Double_t z, Double_t t, Double_t e)
+void KBG4RunManager::AddMCStep(Int_t detectorID, Int_t copyNo, Double_t x, Double_t y, Double_t z, Double_t t, Double_t e)
 {
 	Int_t motherID = (detectorID/1000)*10;
 	Int_t moduleID = detectorID>1000 ? detectorID%1000 : 0;
 	auto idx = fIdxOfCopyNo[motherID];
-
+  
   if (fSetEdepSumTree)
     fEdepSumArray[idx] = fEdepSumArray[idx] + e;
 
@@ -387,7 +387,7 @@ void KBG4RunManager::AddMCStep(Int_t detectorID, Double_t x, Double_t y, Double_
       return;
 
     KBMCStep *step = (KBMCStep *) stepArray -> ConstructedAt(stepArray -> GetEntriesFast());
-    step -> SetMCStep(fTrackID, moduleID, x, y, z, t, e);
+    step -> SetMCStep(fTrackID, moduleID, detectorID, x, y, z, t, e);
   }
 }
 

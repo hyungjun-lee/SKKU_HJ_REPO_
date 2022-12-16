@@ -10,6 +10,8 @@
 #include <stdlib.h>
 #include "TFormula.h"
 
+#include "TObjString.h"
+
 using namespace std;
 
 ClassImp(KBParameterContainer)

@@ -245,7 +245,8 @@ KBGeoCircle KBHitArray::FitCircle(kbaxis ref)
   KBGeoCircle fitCircle;
   fitCircle.SetRMS(-1);
 
-  if (fN < 4)
+  //if (fN < 4)
+  if (fN < 2)
     return fitCircle;
 
   auto mean = GetMean(ref);
@@ -255,7 +256,7 @@ KBGeoCircle KBHitArray::FitCircle(kbaxis ref)
   auto posRiemann    = KBVector3(ref,mean.I(),mean.J(),rRiemann);
   auto posRiemannTop = KBVector3(ref,mean.I(),mean.J(),2*rRiemann);
   auto posRiemannBot = KBVector3(ref,mean.I(),mean.J(),0);
-
+  
   Double_t iProjectionMean = 0;
   Double_t jProjectionMean = 0;
   Double_t kProjectionMean = 0;
@@ -353,7 +354,7 @@ TCanvas *KBHitArray::DrawFitCircle(kbaxis ref)
   KBGeoCircle fitCircle;
   fitCircle.SetRMS(-1);
 
-  if (fN < 4)
+  if (fN < 2)
     return cvs0;
 
   auto mean = GetMean(ref);
@@ -364,6 +365,7 @@ TCanvas *KBHitArray::DrawFitCircle(kbaxis ref)
   auto posRiemannTop = KBVector3(ref,mean.I(),mean.J(),2*rRiemann);
   auto posRiemannBot = KBVector3(ref,mean.I(),mean.J(),0);
 
+  cout << rRiemann << endl ;
   Double_t iProjectionMean = 0;
   Double_t jProjectionMean = 0;
   Double_t kProjectionMean = 0;
@@ -462,7 +464,7 @@ TCanvas *KBHitArray::DrawFitCircle(kbaxis ref)
 
   Double_t scale = 1.1;
   Double_t dx = scale*rRiemann;
-
+  
   cvs0 -> cd(); auto frame0 = new TH2D("side (t)",";t;k", 100, tRiemann-dx, tRiemann+dx, 100, rRiemann-dx, rRiemann+dx); frame0 -> Draw();
   cvs1 -> cd(); auto frame1 = new TH2D("side (v)",";v;k", 100, vRiemann-dx, vRiemann+dx, 100, rRiemann-dx, rRiemann+dx); frame1 -> Draw();
   cvs2 -> cd(); auto frame2 = new TH2D("top",     ";i;j", 100, posRiemann.I()-dx, posRiemann.I()+dx, 100, posRiemann.J()-dx, posRiemann.J()+dx); frame2 -> Draw();
@@ -619,7 +621,8 @@ KBGeoHelix KBHitArray::FitHelix(kbaxis ref)
   helix.SetRMSR(-1);
   helix.SetRMST(-1);
 
-  if (fN < 5)
+  //if (fN < 5)
+  if (fN < 3)
     return helix;
 
   SortByX(true);
@@ -696,6 +699,17 @@ KBGeoHelix KBHitArray::FitHelix(kbaxis ref)
   helix.SetS(slope);
   helix.SetK(offset);
   helix.SetA(ref);
+  
+ /* 
+  kb_debug << "helix I : " << helixI << endl;
+  kb_debug << "helix J : " << helixJ << endl;
+  kb_debug << "helix R : " << circle.GetR() << endl;
+  kb_debug << "helix H : " << alphaMax << endl;
+  kb_debug << "helix T : " << alphaMin << endl;
+  kb_debug << "helix S : " << slope << endl;
+  kb_debug << "helix K : " << offset << endl;
+  kb_debug << "helix A : " << ref << endl;
+  */
 
   Double_t sr = 0; // = sum of distance from hit to track in radial axis
   Double_t st = 0; // = sum of distance from hit to track in axial axis
@@ -721,11 +735,91 @@ KBGeoHelix KBHitArray::FitHelix(kbaxis ref)
   return helix;
 }
 
+KBGeoHelix KBHitArray::FitHelix_FT(kbaxis ref)
+{
+
+  int limit_point = 2;
+
+  KBGeoHelix helix;
+  helix.SetRMS (-1);
+  helix.SetRMSR(-1);
+  helix.SetRMST(-1);
+
+  if(fN < limit_point)
+  {
+    cout << "fN is less than " << limit_point << "! : helix points cannot be SET" << endl;
+    return helix;
+  }
+
+  //SortByX(true);
+  //SortByY(true);
+  SortByZ(true);
+  auto Num_hit = GetEntries();
+
+  //cout << Num_hit << endl;
+  for(int i = 0; i < Num_hit; i++)
+  {
+    auto pos0 = GetHit(i) -> GetPosition(ref);
+    //cout << pos0.GetXYZ().Px()<<"\t"<< pos0.GetXYZ().Py()<<"\t"<< pos0.GetXYZ().Pz()  << endl;
+  }
+  
+  return helix;
+}
+/******* hyungjun modified
+bool KBHitArray::CircleFit_LS(point, int N, point *center, double *radius)
+{
+  double sx = 0, sy = 0;
+  double sx2 = 0, sy2 = 0, sxy = 0;
+  double sx3 = 0, sy3 = 0, sx2y = 0, sxy2 =0;
+
+  for(int k = 0; k < N; k++)
+  {
+      double x = Q[k].x, xx = x*x;
+      double y = Q[k].y, yy = y*y;
+      sx += x;
+      sy += y;
+      sx2 += xx;
+      sy2 += yy;
+      sxy += x*y;
+      sx3 += x*xx;
+      sy3 += y*yy;
+      sx2y += xx*y;
+      sxy2 += yy*x;
+  }
+
+  double a1 = 2*(sx*sx-sx2*N);
+  double a2 = 2*(sx*sy -sxy*N);
+  double b1 = a2;
+  double b2 = 2*(sy*sy-sy2*N);
+  double c1 = (sx2+sy2)*sx - (sx3*N+sxy2)*N;
+  double c2 = (sx2+sy2)*sy - (sy3*N+sx2y)*N;
+  double det = a1*b2-a2*b1;
+
+  if(fabs(det)< 1.e-10)
+  {
+    return false;
+  }
+
+  double cx = (c1*b2-c2*b1)/det;
+  double cy = (a1*c2-a2*c1)/det;
+
+  double radsq = cx*cx+cy*cy+(sx2+sy2-2*(sx*cs+sy*cy))/N;
+  *radius = sqrt(radsq);
+
+  center->x = int(cx+.5);
+  center->y = int(cy+.5);
+
+  return true;
+}
+*********/
+
+
 void KBHitArray::AddHit(KBHit* hit)
 {
   Add(hit);
-
+  
   AddXYZW(hit->GetX(), hit->GetY(), hit->GetZ(), hit->GetCharge());
+
 }
 
 void KBHitArray::AddXYZW(TVector3 pos, Double_t w)
@@ -736,7 +830,7 @@ void KBHitArray::AddXYZW(TVector3 pos, Double_t w)
 void KBHitArray::AddXYZW(Double_t x, Double_t y, Double_t z, Double_t w)
 {
   Double_t wsum = fW + w;
-
+  
   fEX  = (fW*fEX + w*x) / wsum;
   fEY  = (fW*fEY + w*y) / wsum;
   fEZ  = (fW*fEZ + w*z) / wsum;

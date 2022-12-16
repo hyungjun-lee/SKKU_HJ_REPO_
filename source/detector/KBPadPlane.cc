@@ -236,15 +236,17 @@ void KBPadPlane::ResetHitMap()
 KBTpcHit *KBPadPlane::PullOutNextFreeHit()
 {
   if (fFreePadIdx == fChannelArray -> GetEntriesFast() - 1)
+    {
+    //kb_info << "PullOut FreePad : null" << "\t" << "FreePad Idx : " << fFreePadIdx << endl;
     return nullptr;
-
+    }
   auto pad = (KBPad *) fChannelArray -> At(fFreePadIdx);
   auto hit = pad -> PullOutNextFreeHit();
   if (hit == nullptr) {
     fFreePadIdx++;
+    //std::cout << "FreePad Idx : " << fFreePadIdx << std::endl;
     return PullOutNextFreeHit();
   }
-
   return hit;
 }
 

@@ -120,6 +120,10 @@ endforeach(_directory)
 include_directories(${CMAKE_SOURCE_DIR}/log)
 
 add_definitions(${ROOT_CXX_FLAGS})
+message(${ROOT_CXX_FLAGS})
+message(${ROOT_CXX_FLAGS})
+message(${ROOT_CXX_FLAGS})
+message(${ROOT_CXX_FLAGS})
 
 foreach(_name ${KEBI_SOURCE_NAME_LIST})
   ROOT_GENERATE_DICTIONARY(${KEBI_${_name}_G_NAME}

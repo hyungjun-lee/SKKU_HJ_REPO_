@@ -66,6 +66,7 @@ class KBHitArray : public TObjArray
     KBGeoPlane FitPlane();
     KBGeoCircle FitCircle(kbaxis ref = KBVector3::kZ);
     KBGeoHelix FitHelix(kbaxis ref = KBVector3::kZ);
+    KBGeoHelix FitHelix_FT(kbaxis ref = KBVector3::kZ);
 
     TCanvas *DrawFitCircle(kbaxis ref = KBVector3::kZ);
 

@@ -19,6 +19,7 @@ class KBMCStep : public KBContainer
 
 		void SetTrackID(Int_t val);
 		void SetModuleID(Int_t val);
+		void SetcopyNo(Int_t val);
     void SetX(Double_t val);
     void SetY(Double_t val);
     void SetZ(Double_t val);
@@ -27,9 +28,11 @@ class KBMCStep : public KBContainer
 
     void SetMCStep(Int_t trackID, Double_t x, Double_t y, Double_t z, Double_t time, Double_t edep);
 		void SetMCStep(Int_t trackID, Int_t moduleID, Double_t x, Double_t y, Double_t z, Double_t time, Double_t edep);
+		void SetMCStep(Int_t trackID, Int_t moduleID, Int_t copyNo, Double_t x, Double_t y, Double_t z, Double_t time, Double_t edep);
 
 		Int_t GetTrackID()  const;
 		Int_t GetModuleID() const;
+		Int_t GetcopyNo() const;
     Double_t GetX()     const;
     Double_t GetY()     const;
     Double_t GetZ()     const;
@@ -47,6 +50,7 @@ class KBMCStep : public KBContainer
   private:
 		Int_t fTrackID;
 		Int_t fModuleID;
+		Int_t fcopyNo;
     Double_t fX;
     Double_t fY;
     Double_t fZ;

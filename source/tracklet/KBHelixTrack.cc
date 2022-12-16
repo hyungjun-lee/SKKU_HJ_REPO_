@@ -235,8 +235,9 @@ bool KBHelixTrack::Fit()
 {
   auto helix = fHitArray.FitHelix(fA);
   if (helix.GetRMS() < 0)
-    return false;
-
+  {
+     return false;
+  }
   SetIsHelix();
   KBGeoHelix::SetHelix(helix.GetI(), helix.GetJ(), helix.GetR(), helix.GetS(),
                        helix.GetK(), helix.GetT(), helix.GetH(), helix.GetA());
@@ -247,6 +248,20 @@ bool KBHelixTrack::Fit()
 
   return true;
 }
+
+bool KBHelixTrack::Fit_FT()
+{
+  auto helix = fHitArray.FitHelix_FT(fA);
+  if (helix.GetRMS() < 0)
+  {
+     return false;
+  }
+
+  return true;
+}
+
+
+
 
 bool KBHelixTrack::FitPlane()
 {

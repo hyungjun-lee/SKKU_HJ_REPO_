@@ -69,6 +69,7 @@ class KBHelixTrack : public KBTracklet, public KBGeoHelix
 #endif
 
     virtual bool Fit();
+    virtual bool Fit_FT();
     virtual bool FitPlane();
 
     void AddHit(KBHit *hit);

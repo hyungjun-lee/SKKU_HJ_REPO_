@@ -29,6 +29,8 @@
 #include "TEveArrow.h"
 #endif
 
+#include "TObjString.h"
+
 #include "KBHit.hh"
 #include "KBContainer.hh"
 #include "KBTracklet.hh"

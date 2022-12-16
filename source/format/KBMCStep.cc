@@ -42,6 +42,7 @@ void KBMCStep::Print(Option_t *option) const
 void KBMCStep::Clear(Option_t *option) {
 	fTrackID = -1;
 	fModuleID = -1;
+  fcopyNo = -1;
   fX = -999;
   fY = -999;
   fZ = -999;
@@ -51,6 +52,7 @@ void KBMCStep::Clear(Option_t *option) {
 
 void KBMCStep::SetTrackID(Int_t val)  { fTrackID = val; }
 void KBMCStep::SetModuleID(Int_t val)  { fModuleID = val; }
+void KBMCStep::SetcopyNo(Int_t val)  { fcopyNo = val; }
 void KBMCStep::SetX(Double_t val)     { fX = val; }
 void KBMCStep::SetY(Double_t val)     { fY = val; }
 void KBMCStep::SetZ(Double_t val)     { fZ = val; }
@@ -79,8 +81,21 @@ void KBMCStep::SetMCStep(Int_t trackID, Int_t moduleID, Double_t x, Double_t y, 
   fEdep = edep;
 }
 
+void KBMCStep::SetMCStep(Int_t trackID, Int_t moduleID, Int_t copyNo, Double_t x, Double_t y, Double_t z, Double_t time, Double_t edep)
+{
+  fTrackID = trackID;
+	fModuleID = moduleID;
+  fcopyNo = copyNo;
+  fX = x;
+  fY = y;
+  fZ = z;
+  fTime = time;
+  fEdep = edep;
+}
+
 Int_t KBMCStep::GetTrackID()  const { return fTrackID; }
 Int_t KBMCStep::GetModuleID() const { return fModuleID; }
+Int_t KBMCStep::GetcopyNo() const { return fcopyNo; }
 Double_t KBMCStep::GetX()     const { return fX; }
 Double_t KBMCStep::GetY()     const { return fY; }
 Double_t KBMCStep::GetZ()     const { return fZ; }
