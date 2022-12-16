@@ -1,0 +1,5 @@
+/run/setCutForAGivenParticle e- 100. mm
+
+/run/suppressPP true
+#/run/beamOnAll
+/run/beamOn 1000
