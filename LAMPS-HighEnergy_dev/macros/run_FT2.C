@@ -64,7 +64,7 @@ void run_FT2(const char *name = "g4event")
 				htfTask->SetHitBranchName("TPCHit");
 				htfTask->SetHitBranchName_FT("FTHit"); //
 				htfTask->SetTrackletBranchName("Tracklet");
-				run->Add(htfTask);
+				run->Add(htfTask); 
 			}
 
 			if (FTDet)
