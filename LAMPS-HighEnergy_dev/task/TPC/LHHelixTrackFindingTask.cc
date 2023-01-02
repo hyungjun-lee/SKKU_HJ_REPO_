@@ -122,7 +122,7 @@ int LHHelixTrackFindingTask::StepInitArray()
     
     hit_FT->SetPadID(fPadPlane -> FindPadID(hit_FT->GetX(),hit_FT->GetY()));
   //kb_debug << hit_FT->GetX() << "\t" << hit_FT->GetY() << " " << hit_FT->GetZ() << endl ;//"\t" << fPadPlane -> FindPadID(hit_FT->GetX(),hit_FT->GetY()) << endl;
-  kb_debug << fPadPlane -> FindPadID(hit_FT->GetX(),hit_FT->GetY()) << endl;
+  //kb_debug << fPadPlane -> FindPadID(hit_FT->GetX(),hit_FT->GetY()) << endl;
     //fPadPlane -> AddHit(hit_FT);
   }
  
@@ -132,8 +132,8 @@ int LHHelixTrackFindingTask::StepInitArray()
   fGoodHits -> Clear();
   fBadHits -> Clear(); 
 
-  return kStepEndOfEvent;
-  ///return kStepNewTrack;
+  ///return kStepEndOfEvent;
+  return kStepNewTrack;
 }
 
 /**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**/

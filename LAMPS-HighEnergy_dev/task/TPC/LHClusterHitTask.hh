@@ -1,5 +1,5 @@
-#ifndef LHHELIXTRACKFINDINGTASK_HH
-#define LHHELIXTRACKFINDINGTASK_HH
+#ifndef LHCLUSTERHITTASK_HH
+#define LHCLUSTERHITTASK_HH
 
 #include "TClonesArray.h"
 #include "TGraphErrors.h"
@@ -52,7 +52,7 @@ class LHClusterHitTask : public KBTask
     void SetHitBranchName(TString name) { fBranchNameHit = name; }
     void SetHitBranchName_FT(TString name) { fBranchNameHit_FT = name; }
     void SetTrackletBranchName(TString name) { fBranchNameTracklet = name; }
-
+  	
   private:
     int StepInitArray();
     int StepNewTrack();
@@ -87,13 +87,17 @@ class LHClusterHitTask : public KBTask
     LHTpc *fTpc = nullptr;
     KBPadPlane *fPadPlane = nullptr;
     TClonesArray *fHitArray = nullptr;
-    TClonesArray *fHitArray_FT = nullptr;
     TClonesArray *fTrackArray = nullptr;
+
+    TClonesArray *fTrackHitsArray = nullptr;
+    TClonesArray *fCandHitsArray = nullptr;
+    TClonesArray *fGoodHitsArray = nullptr;
+    TClonesArray *fBadHitsArray = nullptr;
 
     TString fBranchNameHit = "Hit";
     TString fBranchNameHit_FT = "Hit2";
     TString fBranchNameTracklet = "Tracklet";
-
+	  
     bool fPersistency = true;
 
     KBHitArray *fTrackHits = nullptr;
@@ -120,6 +124,7 @@ class LHClusterHitTask : public KBTask
     Double_t fCutdkInExpectedTrackPath = 4.; // the correlation distance cut through helix axis during the track path between two hits
 
     KBHelixTrack *fCurrentTrack = nullptr;
+    KBHitArray * fGoodHits2 = nullptr;
 
     Int_t fNextStep = StepNo::kStepInitArray;
     Int_t fNumCandHits;
@@ -129,7 +134,7 @@ class LHClusterHitTask : public KBTask
     TCanvas *fCvsCurrentTrack = nullptr;
     TGraphErrors *fGraphCurrentTrackPoint = nullptr;
 
-  ClassDef(LHHelixTrackFindingTask, 1)
+  ClassDef(LHClusterHitTask, 1)
 };
 
 #endif

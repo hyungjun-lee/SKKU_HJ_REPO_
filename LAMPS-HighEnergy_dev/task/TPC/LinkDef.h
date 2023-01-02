@@ -14,5 +14,6 @@
 #pragma link C++ class LHMCRecoMatchingTask+;
 #pragma link C++ class LHRecoEfficiencyAna+;
 #pragma link C++ class LHSelectHitsBelongToMCIDTask+;
+#pragma link C++ class LHClusterHitTask+;
 
 #endif
