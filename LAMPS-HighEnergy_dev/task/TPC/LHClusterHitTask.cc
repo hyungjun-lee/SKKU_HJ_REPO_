@@ -21,6 +21,16 @@ ClassImp(LHClusterHitTask)
   fTrackArray = new TClonesArray("KBHelixTrack");
   run->RegisterBranch(fBranchNameTracklet, fTrackArray, fPersistency);
 
+  fTrackHitsArray = new TClonesArray("KBHitArray");
+  fCandHitsArray = new TClonesArray("KBHitArray");
+  fGoodHitsArray = new TClonesArray("KBHitArray");
+  fBadHitsArray = new TClonesArray("KBHitArray");
+
+  run->RegisterBranch("TPCTrackHitArray", fTrackHitsArray, true);
+  run->RegisterBranch("TPCCandHitArray", fCandHitsArray, true);
+  run->RegisterBranch("TPCGoodHitArray", fGoodHitsArray, true);
+  run->RegisterBranch("TPCBadHitArray", fBadHitsArray, true);
+
   fTrackHits = new KBHitArray();
   fCandHits = new KBHitArray();
   fGoodHits = new KBHitArray();
@@ -43,7 +53,7 @@ ClassImp(LHClusterHitTask)
   return true;
 }
 
-void LHHelixTrackFindingTask::Exec(Option_t *)
+void LHClusterHitTask::Exec(Option_t *)
 {
   fNextStep = StepNo::kStepInitArray;
   while (ExecStep())
@@ -51,7 +61,7 @@ void LHHelixTrackFindingTask::Exec(Option_t *)
   }
 }
 
-bool LHHelixTrackFindingTask::ExecStep()
+bool LHClusterHitTask::ExecStep()
 {
   if (fNextStep == kStepEndOfEvent)
     return false;
@@ -116,7 +126,7 @@ bool LHHelixTrackFindingTask::ExecStep()
   return true;
 }
 
-bool LHHelixTrackFindingTask::ExecStepUptoTrackNum(Int_t numTracks)
+bool LHClusterHitTask::ExecStepUptoTrackNum(Int_t numTracks)
 {
   if (fNextStep == kStepEndOfEvent)
     return false;
@@ -130,7 +140,7 @@ bool LHHelixTrackFindingTask::ExecStepUptoTrackNum(Int_t numTracks)
   return true;
 }
 
-int LHHelixTrackFindingTask::StepInitArray()
+int LHClusterHitTask::StepInitArray()
 {
 #ifdef DEBUG_STEP
   kb_debug << "StepInitArray" << endl;
@@ -148,15 +158,16 @@ int LHHelixTrackFindingTask::StepInitArray()
   fGoodHits->Clear();
   fBadHits->Clear();
 
-  return kStepEndOfEvent;
-  /// return kStepNewTrack;
+  fGoodHitsArray->Clear("C");
+
+  return kStepNewTrack;
 }
 
 /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/
 /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/
 /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/
 
-int LHHelixTrackFindingTask::StepNewTrack()
+int LHClusterHitTask::StepNewTrack()
 {
 #ifdef DEBUG_STEP
   kb_debug << "StepNewTrack" << endl;
@@ -182,6 +193,10 @@ int LHHelixTrackFindingTask::StepNewTrack()
   fCurrentTrack->AddHit(hit);
   fGoodHits->AddHit(hit);
 
+  Int_t ihit = fGoodHitsArray->GetEntries();
+  fGoodHits2 = new ((*fGoodHitsArray)[ihit]) KBHitArray(ihit);
+  fGoodHits2->AddHit(hit);
+
 #ifdef DEBUG_STEP
   fCurrentTrack->Print(">");
 #endif
@@ -189,7 +204,7 @@ int LHHelixTrackFindingTask::StepNewTrack()
   return kStepInitTrack;
 }
 
-int LHHelixTrackFindingTask::StepRemoveTrack()
+int LHClusterHitTask::StepRemoveTrack()
 {
 #ifdef DEBUG_STEP
   kb_debug << "StepRemoveTrack" << endl;
@@ -240,7 +255,7 @@ int LHHelixTrackFindingTask::StepRemoveTrack()
 /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/
 /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/
 
-int LHHelixTrackFindingTask::StepInitTrack()
+int LHClusterHitTask::StepInitTrack()
 {
   double vx, vy, vz, vr;
   auto VectorTest = fCurrentTrack->GetMean();
@@ -274,7 +289,7 @@ int LHHelixTrackFindingTask::StepInitTrack()
   return kStepInitTrackAddHit;
 }
 
-int LHHelixTrackFindingTask::StepInitTrackAddHit()
+int LHClusterHitTask::StepInitTrackAddHit()
 {
 #ifdef DEBUG_STEP
   kb_debug << "StepInitTrackAddHit, fNumCandHits=" << fNumCandHits << endl;
@@ -320,7 +335,7 @@ int LHHelixTrackFindingTask::StepInitTrackAddHit()
       kb_debug << "fit track since track has enough number of hits" << endl;
 #endif
       // fCurrentTrack -> SetIsHelix();
-      fCurrentTrack->Fit();
+      // fCurrentTrack->Fit();
 #ifdef DEBUG_STEP
       kb_debug << "After fit, " << endl;
       fCurrentTrack->Print();
@@ -374,7 +389,7 @@ int LHHelixTrackFindingTask::StepInitTrackAddHit()
 /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/
 /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/
 
-int LHHelixTrackFindingTask::StepContinuum()
+int LHClusterHitTask::StepContinuum()
 {
 #ifdef DEBUG_STEP
   kb_debug << "StepContinuum" << endl;
@@ -392,7 +407,7 @@ int LHHelixTrackFindingTask::StepContinuum()
   return kStepContinuumAddHit;
 }
 
-int LHHelixTrackFindingTask::StepContinuumAddHit()
+int LHClusterHitTask::StepContinuumAddHit()
 {
 #ifdef DEBUG_STEP
   kb_debug << "StepContinuumAddHit" << endl;
@@ -410,7 +425,7 @@ int LHHelixTrackFindingTask::StepContinuumAddHit()
     {
       fGoodHits->AddHit(candHit);
       fCurrentTrack->AddHit(candHit);
-      fCurrentTrack->Fit();
+      // fCurrentTrack->Fit();
 #ifdef DEBUG_STEP
       kb_debug << iHit << "(/" << fNumCandHits << ") is good, quality is " << quality << endl;
 #endif
@@ -431,7 +446,7 @@ int LHHelixTrackFindingTask::StepContinuumAddHit()
 /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/
 /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/
 
-int LHHelixTrackFindingTask::StepExtrapolation()
+int LHClusterHitTask::StepExtrapolation()
 {
 #ifdef DEBUG_STEP
   kb_debug << "StepExtrapolation" << endl;
@@ -441,7 +456,7 @@ int LHHelixTrackFindingTask::StepExtrapolation()
   return kStepExtrapolationAddHit;
 }
 
-int LHHelixTrackFindingTask::StepExtrapolationAddHit()
+int LHClusterHitTask::StepExtrapolationAddHit()
 {
 #ifdef DEBUG_STEP
   kb_debug << "StepExtrapolationAddHit" << endl;
@@ -487,7 +502,7 @@ int LHHelixTrackFindingTask::StepExtrapolationAddHit()
 /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/
 /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/
 
-int LHHelixTrackFindingTask::StepConfirmation()
+int LHClusterHitTask::StepConfirmation()
 {
 #ifdef DEBUG_STEP
   kb_debug << "StepConfirmation" << endl;
@@ -532,7 +547,7 @@ int LHHelixTrackFindingTask::StepConfirmation()
   return kStepFinalizeTrack;
 }
 
-int LHHelixTrackFindingTask::StepFinalizeTrack()
+int LHClusterHitTask::StepFinalizeTrack()
 {
   auto trackHits = fCurrentTrack->GetHitArray();
   Int_t trackID = fCurrentTrack->GetTrackID();
@@ -551,7 +566,7 @@ int LHHelixTrackFindingTask::StepFinalizeTrack()
   return kStepNewTrack;
 }
 
-int LHHelixTrackFindingTask::StepNextPhase()
+int LHClusterHitTask::StepNextPhase()
 {
   if (fPhaseIndex == 0)
   {
@@ -579,7 +594,7 @@ int LHHelixTrackFindingTask::StepNextPhase()
     return kStepEndEvent;
 }
 
-int LHHelixTrackFindingTask::StepEndEvent()
+int LHClusterHitTask::StepEndEvent()
 {
   fTrackArray->Compress();
 
@@ -600,7 +615,7 @@ int LHHelixTrackFindingTask::StepEndEvent()
 /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/
 /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/
 
-void LHHelixTrackFindingTask::ReturnBadHitsToPadPlane()
+void LHClusterHitTask::ReturnBadHitsToPadPlane()
 {
   fNumBadHits = fBadHits->GetEntriesFast();
   for (Int_t iBad = 0; iBad < fNumBadHits; ++iBad)
@@ -612,7 +627,7 @@ void LHHelixTrackFindingTask::ReturnBadHitsToPadPlane()
 /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/
 /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/
 
-double LHHelixTrackFindingTask::CorrelateHitWithTrackCandidate(KBHelixTrack *track, KBTpcHit *hit)
+double LHClusterHitTask::CorrelateHitWithTrackCandidate(KBHelixTrack *track, KBTpcHit *hit)
 {
 #ifdef DEBUG_STEP
   kb_debug << "======================================== track hits" << endl;
@@ -736,7 +751,7 @@ double LHHelixTrackFindingTask::CorrelateHitWithTrackCandidate(KBHelixTrack *tra
   return quality;
 }
 
-double LHHelixTrackFindingTask::CorrelateHitWithTrack(KBHelixTrack *track, KBTpcHit *hit, Double_t rScale)
+double LHClusterHitTask::CorrelateHitWithTrack(KBHelixTrack *track, KBTpcHit *hit, Double_t rScale)
 {
   Double_t scale = rScale * fDefaultScale;
   Double_t trackLength = track->TrackLength();
@@ -807,7 +822,7 @@ double LHHelixTrackFindingTask::CorrelateHitWithTrack(KBHelixTrack *track, KBTpc
 /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/
 /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/ /**/
 
-bool LHHelixTrackFindingTask::BuildAndConfirmTrack(KBHelixTrack *track, bool &tailToHead)
+bool LHClusterHitTask::BuildAndConfirmTrack(KBHelixTrack *track, bool &tailToHead)
 {
   track->SortHits(!tailToHead);
   auto trackHits = track->GetHitArray();
@@ -859,7 +874,7 @@ bool LHHelixTrackFindingTask::BuildAndConfirmTrack(KBHelixTrack *track, bool &ta
   return true;
 }
 
-bool LHHelixTrackFindingTask::AutoBuildByExtrapolation(KBHelixTrack *track, bool &buildHead, Double_t &extrapolationLength)
+bool LHClusterHitTask::AutoBuildByExtrapolation(KBHelixTrack *track, bool &buildHead, Double_t &extrapolationLength)
 {
   if (track->GetNumHits() < fCutMinNumHitsFinalTrack)
     return false;
@@ -876,7 +891,7 @@ bool LHHelixTrackFindingTask::AutoBuildByExtrapolation(KBHelixTrack *track, bool
   return AutoBuildAtPosition(track, p, buildHead, extrapolationLength);
 }
 
-bool LHHelixTrackFindingTask::AutoBuildAtPosition(KBHelixTrack *track, TVector3 p, bool &tailToHead, Double_t &extrapolationLength, Double_t rScale)
+bool LHClusterHitTask::AutoBuildAtPosition(KBHelixTrack *track, TVector3 p, bool &tailToHead, Double_t &extrapolationLength, Double_t rScale)
 {
   KBVector3 p2(p, fReferenceAxis);
   if (fPadPlane->IsInBoundary(p2.I(), p2.J()) == false)
@@ -937,7 +952,7 @@ bool LHHelixTrackFindingTask::AutoBuildAtPosition(KBHelixTrack *track, TVector3 
   return true;
 }
 
-int LHHelixTrackFindingTask::CheckParentTrackID(KBTpcHit *hit)
+int LHClusterHitTask::CheckParentTrackID(KBTpcHit *hit)
 {
   vector<Int_t> *candTracks = hit->GetTrackCandArray();
   Int_t numCandTracks = candTracks->size();
@@ -957,7 +972,7 @@ int LHHelixTrackFindingTask::CheckParentTrackID(KBTpcHit *hit)
   return trackID;
 }
 
-bool LHHelixTrackFindingTask::CheckTrackQuality(KBHelixTrack *track)
+bool LHClusterHitTask::CheckTrackQuality(KBHelixTrack *track)
 {
   /*
   Double_t continuity = CheckTrackContinuity(track);
@@ -973,7 +988,7 @@ bool LHHelixTrackFindingTask::CheckTrackQuality(KBHelixTrack *track)
   return true;
 }
 
-double LHHelixTrackFindingTask::CheckTrackContinuity(KBHelixTrack *track)
+double LHClusterHitTask::CheckTrackContinuity(KBHelixTrack *track)
 {
   Int_t numHits = track->GetNumHits();
   if (numHits < 2)
@@ -1019,7 +1034,7 @@ double LHHelixTrackFindingTask::CheckTrackContinuity(KBHelixTrack *track)
   return continuous / total;
 }
 
-bool LHHelixTrackFindingTask::CheckHitDistInAlphaIsLargerThanQuarterPi(KBHelixTrack *track, Double_t dLength)
+bool LHClusterHitTask::CheckHitDistInAlphaIsLargerThanQuarterPi(KBHelixTrack *track, Double_t dLength)
 {
   if (dLength > 0)
   {

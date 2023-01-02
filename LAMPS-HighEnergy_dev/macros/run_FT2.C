@@ -60,16 +60,17 @@ void run_FT2(const char *name = "g4event")
 
 			if (TPCDet)
 			{
-				auto htfTask = new LHHelixTrackFindingTask();
+				auto htfTask = new LHClusterHitTask();
 				htfTask->SetHitBranchName("TPCHit");
-				htfTask->SetHitBranchName_FT("FTHit"); //
+				//htfTask->SetHitBranchName_FT("FTHit"); //
 				htfTask->SetTrackletBranchName("Tracklet");
 				run->Add(htfTask); 
 			}
 
 			if (FTDet)
 			{
-				auto htfTask = new FTHelixTrackFindingTask();
+				auto htfTask = new LHClusterHitTask();
+
 				htfTask->SetHitBranchName("FTHit");
 				htfTask->SetTrackletBranchName("Tracklet");
 				run->Add(htfTask);
